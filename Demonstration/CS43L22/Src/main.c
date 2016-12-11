@@ -49,7 +49,13 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+uint8_t initV[2];
+uint16_t Istr[1];
 
+uint8_t note[] = {0x0A, 0x1A, 0x2A, 0x3A,
+									0x4A, 0x5A, 0x6A, 0x7A,
+									0x8A, 0x9A, 0xAA, 0xBA,
+									0xCA, 0xDA, 0xEA, 0xFA };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,7 +69,9 @@ static void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+void Init_Sound(void);
+void Receive_Note(void);		
+void Play_Note(int32_t);					
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -93,7 +101,7 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
+	Init_Sound();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -103,7 +111,7 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+			Receive_Note();
   }
   /* USER CODE END 3 */
 
@@ -393,7 +401,90 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void Receive_Note(){
+	uint8_t receive;
+	if (HAL_UART_Receive(&huart2, &receive, 1, 1000) == HAL_OK){
+		HAL_UART_Transmit(&huart2, &receive, 1, 1000);
+		Play_Note(receive - '0');
+	}
+}
 
+void Play_Note(int32_t a){
+	
+	if(a < 0 || a > 9) return;
+	
+	//Off
+	initV[0] = 0x1E;
+	initV[1] = 0x20;
+	HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50);
+
+	//Change note to note a
+	initV[0] = 0x1C;
+	initV[1] = note[a];
+	HAL_I2C_Master_Transmit (&hi2c1, 0x94, initV, 2, 50);
+
+	//On Continue
+	initV[0] = 0x1E;
+	initV[1] = 0xE0;
+	HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50);
+
+	int i;
+	for(i=0;i<100;i++) HAL_I2S_Transmit (&hi2s3, Istr , 200, 10);
+}
+
+void Init_Sound(){
+
+	  Istr[0] = 0;
+
+	  if( HAL_I2S_Transmit (&hi2s3, Istr , 0x10, 10) != HAL_OK) 
+	    Error_Handler();
+
+
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_RESET);  //Reset is set down
+
+	  //confirmation LED
+	  HAL_Delay(500);
+
+	  //Initialization sequence for CS43L22:
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET); //Reset is set Up (Power CS43L22)
+	  HAL_Delay(500);
+	  initV[0] = 0x00;
+	  initV[1] = 0x99;
+	  if(HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50) != HAL_OK)    //check if transfer failed. If so: turn on Red LED
+			Error_Handler();   //#1 not understood #2 Slaveadress + read/write (r=1 w=0) #3register to write #4 value written #5 amount of Data #6 timeout in mS
+		
+	  initV[0] = 0x47;
+	  initV[1] = 0x80;
+	  if(HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50) != HAL_OK)
+			Error_Handler();
+
+	  initV[0] = 0x32;
+	  initV[1] = 0x80; // 0xBB or 0x80
+	  if(HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50) != HAL_OK)
+			Error_Handler();
+
+	  initV[0] = 0x32;
+	  initV[1] = 0x00; // 0x3B or 0x00
+	  if(HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50) != HAL_OK)
+			Error_Handler();
+
+	  initV[0] = 0x00;
+	  initV[1] = 0x00;
+	  if(HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50) != HAL_OK)
+			Error_Handler();
+
+
+	  initV[0] = 0x1E;
+	  initV[1] = 0xC0;
+	  if(HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50) != HAL_OK)
+			Error_Handler();
+
+	  initV[0] = 0x02;
+	  initV[1] = 0x9E;
+	  if(HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50)!= HAL_OK)
+			Error_Handler();
+
+}
 /* USER CODE END 4 */
 
 /**
@@ -405,7 +496,8 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler */
   /* User can add his own implementation to report the HAL error return state */
-  while(1) 
+  HAL_GPIO_WritePin(GPIOD,GPIO_PIN_14,GPIO_PIN_SET);
+	while(1) 
   {
   }
   /* USER CODE END Error_Handler */ 
