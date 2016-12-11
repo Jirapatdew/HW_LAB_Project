@@ -35,7 +35,7 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -57,7 +57,10 @@ static void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+void Init_Accel(void);
+void Get_Accel(void);
+void Print_Accel(uint8_t,uint8_t,uint8_t);
+void On_LED_Accel(uint8_t,uint8_t,uint8_t);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -85,7 +88,7 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
+	Init_Accel();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -95,7 +98,8 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+		Get_Accel();	
+		HAL_Delay(150);
   }
   /* USER CODE END 3 */
 
@@ -345,7 +349,72 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void Init_Accel(){
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_RESET); //PE3 CS_I2C/SPI (chip select)
+  uint8_t address = 0x20; //CTRL_REG1 (20h)
+  HAL_SPI_Transmit(&hspi1,&address,1,50);
 
+  uint8_t data = 0x47; // 0100 0111   bit[7:0](bit 5 FS 0=+-2g 1=+-8g)
+  HAL_SPI_Transmit(&hspi1,&data,1,50);
+  HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_SET);
+}
+void Get_Accel(){
+	uint8_t address,x,y,z;
+	
+	//Receive
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_RESET);
+
+  address = 0x29 | 0x80; // OUT_X (29h)
+  // Combine with Read bit(bit 0). 0010 1001 | 1000 0000
+  HAL_SPI_Transmit(&hspi1,&address,1,50);
+  HAL_SPI_Receive(&hspi1,&x,1,50);
+
+	address = 0x2B | 0x80; // OUT_Y (2Bh)
+	HAL_SPI_Transmit(&hspi1,&address,1,50);
+  HAL_SPI_Receive(&hspi1,&y,1,50);
+
+  address = 0x2C | 0x80; //OUT_Z (2Dh)
+  HAL_SPI_Transmit(&hspi1,&address,1,50);
+  HAL_SPI_Receive(&hspi1,&z,1,50);
+
+  HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_SET);
+	
+	On_LED_Accel(x,y,z);
+	Print_Accel(x,y,z);
+}
+void Print_Accel(uint8_t x,uint8_t y,uint8_t z){
+	//UART
+	char a[20];
+	
+	sprintf(a,"%d",x);
+	HAL_UART_Transmit(&huart2,(uint8_t*)"x = ",4,1000);
+	HAL_UART_Transmit(&huart2,(uint8_t*)a,strlen(a),10000);
+
+	sprintf(a,"%d",y);
+	HAL_UART_Transmit(&huart2,(uint8_t*)"\ty = ",5,1000);
+	HAL_UART_Transmit(&huart2,(uint8_t*)a,strlen(a),10000);
+	
+	sprintf(a,"%d",z);
+	HAL_UART_Transmit(&huart2,(uint8_t*)"\tz = ",5,1000);
+	HAL_UART_Transmit(&huart2,(uint8_t*)a,strlen(a),10000);
+
+	HAL_UART_Transmit(&huart2,(uint8_t*)"\n\r",2,1000);
+
+}
+void On_LED_Accel(uint8_t x,uint8_t y,uint8_t z){
+	//up
+	if((y>15&&y<60)&&(x<15||x>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
+	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
+	//left
+	if((x<235&&x>200)&&(y<15||y>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_SET);
+	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_RESET);
+	//right
+	if((x>20&&x<60)&&(y<15||y>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_14,GPIO_PIN_SET);
+	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_14,GPIO_PIN_RESET);
+	//down
+	if((y<240&&y>200)&&(x<15||x>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,GPIO_PIN_SET);
+	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,GPIO_PIN_RESET);
+}
 /* USER CODE END 4 */
 
 /**
