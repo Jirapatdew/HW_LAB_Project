@@ -1,0 +1,26 @@
+--cpu Cortex-M4.fp
+"lis302dl\stm32f4xx_it.o"
+"lis302dl\main.o"
+"lis302dl\stm32f4xx_hal_msp.o"
+"lis302dl\system_stm32f4xx.o"
+"lis302dl\stm32f4xx_hal_tim_ex.o"
+"lis302dl\stm32f4xx_hal_dma_ex.o"
+"lis302dl\stm32f4xx_hal_flash.o"
+"lis302dl\stm32f4xx_hal_gpio.o"
+"lis302dl\stm32f4xx_hal_cortex.o"
+"lis302dl\stm32f4xx_hal_spi.o"
+"lis302dl\stm32f4xx_hal_tim.o"
+"lis302dl\stm32f4xx_hal_rcc.o"
+"lis302dl\stm32f4xx_hal.o"
+"lis302dl\stm32f4xx_hal_flash_ex.o"
+"lis302dl\stm32f4xx_hal_rcc_ex.o"
+"lis302dl\stm32f4xx_hal_dma.o"
+"lis302dl\stm32f4xx_hal_uart.o"
+"lis302dl\stm32f4xx_hal_pwr.o"
+"lis302dl\stm32f4xx_hal_pwr_ex.o"
+"lis302dl\stm32f4xx_hal_flash_ramfunc.o"
+"lis302dl\startup_stm32f407xx.o"
+--library_type=microlib --strict --scatter "LIS302DL\LIS302DL.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "LIS302DL.map" -o LIS302DL\LIS302DL.axf
