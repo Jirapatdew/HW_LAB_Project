@@ -75,7 +75,7 @@ void Play_Note(int32_t);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+uint8_t receive;
 /* USER CODE END 0 */
 
 int main(void)
@@ -402,9 +402,8 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void Receive_Note(){
-	uint8_t receive;
-	if (HAL_UART_Receive(&huart2, &receive, 1, 1000) == HAL_OK){
-		HAL_UART_Transmit(&huart2, &receive, 1, 1000);
+	if (HAL_UART_Receive(&huart2, &receive, 1, 10) == HAL_OK){
+		HAL_UART_Transmit(&huart2, &receive, 1, 10);
 		Play_Note(receive - '0');
 	}
 }
@@ -428,8 +427,7 @@ void Play_Note(int32_t a){
 	initV[1] = 0xE0;
 	HAL_I2C_Master_Transmit(&hi2c1, 0x94, initV, 2, 50);
 
-	int i;
-	for(i=0;i<100;i++) HAL_I2S_Transmit (&hi2s3, Istr , 200, 10);
+	for(int i=0;i<100;i++) HAL_I2S_Transmit (&hi2s3, Istr , 200, 10);
 }
 
 void Init_Sound(){
