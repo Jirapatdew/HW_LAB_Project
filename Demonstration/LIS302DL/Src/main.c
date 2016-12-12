@@ -59,8 +59,8 @@ static void MX_USART2_UART_Init(void);
 /* Private function prototypes -----------------------------------------------*/
 void Init_Accel(void);
 void Get_Accel(void);
-void Print_Accel(uint8_t,uint8_t,uint8_t);
-void On_LED_Accel(uint8_t,uint8_t,uint8_t);
+void Print_Accel(int,int,int);
+void On_LED_Accel(int,int,int);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -373,7 +373,7 @@ void Get_Accel(){
 	HAL_SPI_Transmit(&hspi1,&address,1,50);
   HAL_SPI_Receive(&hspi1,&y,1,50);
 
-  address = 0x2C | 0x80; //OUT_Z (2Dh)
+  address = 0x2D | 0x80; //OUT_Z (2Dh)
   HAL_SPI_Transmit(&hspi1,&address,1,50);
   HAL_SPI_Receive(&hspi1,&z,1,50);
 
@@ -382,26 +382,15 @@ void Get_Accel(){
 	On_LED_Accel(x,y,z);
 	Print_Accel(x,y,z);
 }
-void Print_Accel(uint8_t x,uint8_t y,uint8_t z){
+void Print_Accel(int x,int y,int z){
 	//UART
-	char a[20];
-	
-	sprintf(a,"%d",x);
-	HAL_UART_Transmit(&huart2,(uint8_t*)"x = ",4,1000);
-	HAL_UART_Transmit(&huart2,(uint8_t*)a,strlen(a),10000);
-
-	sprintf(a,"%d",y);
-	HAL_UART_Transmit(&huart2,(uint8_t*)"\ty = ",5,1000);
-	HAL_UART_Transmit(&huart2,(uint8_t*)a,strlen(a),10000);
-	
-	sprintf(a,"%d",z);
-	HAL_UART_Transmit(&huart2,(uint8_t*)"\tz = ",5,1000);
-	HAL_UART_Transmit(&huart2,(uint8_t*)a,strlen(a),10000);
-
-	HAL_UART_Transmit(&huart2,(uint8_t*)"\n\r",2,1000);
-
+	char out[100];
+	int size;
+	size = sprintf(out,"Accelerometer  x = %d   :   y = %d   :   z = %d \n\r",x,y,z);
+  HAL_UART_Transmit(&huart2,(uint8_t*)out,size,1000);
+  HAL_Delay(200);
 }
-void On_LED_Accel(uint8_t x,uint8_t y,uint8_t z){
+void On_LED_Accel(int x,int y,int z){
 	//up
 	if((y>15&&y<60)&&(x<15||x>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
 	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
