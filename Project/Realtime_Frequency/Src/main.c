@@ -81,6 +81,12 @@ __IO uint32_t ITCounter = 0;
 __IO uint32_t AudioDataReady = 0, AudioBuffOffset = 0;
 __IO uint32_t ITOutAudio = 0,nextITOutAudio=0;
 
+/* Global variables */
+int16_t dataXYZ[3];
+char out[100]; 
+int size;
+uint32_t nowTick = 0, preTickLED4 = -1,preTickLED5 = -1;
+uint32_t nowFreq = 16000;
 /* USER CODE END PV */
 
 
@@ -103,6 +109,12 @@ int main(void)
   
   /* Configure the system clock to 168 MHz */
   SystemClock_Config();
+	
+	/* Configure USER Button */
+  BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_EXTI);
+	
+	/* Init Accelerometer */
+  BSP_ACCELERO_Init();
 	
 	USART2_UART_Init();
   
@@ -127,10 +139,48 @@ int main(void)
   BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 70, 44000);
 	
 	 /* start play*/ 
-	BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[0] , PCM_OUT_SIZE*4);
+	BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[0] , PCM_OUT_SIZE*8);
+	
 	
 	while(1){
-			
+		BSP_ACCELERO_GetXYZ(dataXYZ);
+		//size = sprintf(out,"Accelerometer  x = %d   :   y = %d   :   z = %d \n\r",dataXYZ[0],dataXYZ[1],dataXYZ[2]);
+		//size = sprintf(out,"preTickLED5 = %d , preTickLED4 = %d\n\r",preTickLED5,preTickLED4);
+		//HAL_UART_Transmit(&huart2,(uint8_t*)out,size,50);
+    nowTick = HAL_GetTick();
+		if(dataXYZ[0] > 300) {
+			BSP_LED_On(LED5);
+			if(nowTick-preTickLED5 >= 2000) {
+				if(nowFreq<=44000) {
+					nowFreq+=1000;
+					BSP_AUDIO_OUT_SetFrequency(nowFreq);
+					BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[ITOutAudio * (PCM_OUT_SIZE*2)], PCM_OUT_SIZE*8);
+					BSP_LED_Toggle(LED6);
+				}
+				preTickLED5=nowTick;
+			}
+		}
+		else {
+			BSP_LED_Off(LED5);
+			preTickLED5=nowTick;
+		}
+		if(dataXYZ[0] < -300) {
+			BSP_LED_On(LED4);
+			if(nowTick-preTickLED4 >= 2000) {
+				if(nowFreq>=12000) {
+					nowFreq-=1000;
+					BSP_AUDIO_OUT_SetFrequency(nowFreq);
+					BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[ITOutAudio * (PCM_OUT_SIZE*2)], PCM_OUT_SIZE*8);
+					BSP_LED_Toggle(LED6);
+				}
+				preTickLED4=nowTick;
+			}
+		}
+		else {
+			BSP_LED_Off(LED4);	
+			preTickLED4=nowTick;
+		}
+		HAL_Delay(500);
 	}
 	
 	/* Stop audio record */
@@ -233,7 +283,8 @@ static void USART2_UART_Init(void)
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	
+	//BSP_AUDIO_OUT_SetFrequency(32000);
+	//BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[0] , PCM_OUT_SIZE*8);
 }
 
 /**
@@ -344,10 +395,10 @@ void BSP_AUDIO_OUT_TransferComplete_CallBack()
 {
 		BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[ITOutAudio * (PCM_OUT_SIZE*2)], PCM_OUT_SIZE*8);//(*3/2,*3/2)  ,(*2,*3/2) normal ,(1,1)
 	  
-		if(nextITOutAudio == ITCounter){
-			ITOutAudio = ITOutAudio;
-		}
-		else 
+		//if(nextITOutAudio == ITCounter){
+		//	ITOutAudio = ITOutAudio;
+		//}
+		//else 
 			{
 			ITOutAudio = nextITOutAudio;
 			nextITOutAudio+=2;			//+=2 +=3
