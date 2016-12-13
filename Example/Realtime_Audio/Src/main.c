@@ -124,10 +124,10 @@ int main(void)
 
 	
 	/* Initialize audio IN at REC_FREQ */ 
-  BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 70, DEFAULT_AUDIO_IN_FREQ);
+  BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 70, 44000);
 	
 	 /* start play*/ 
-	BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[0] , PCM_OUT_SIZE*3/2);
+	BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[0] , PCM_OUT_SIZE*4);
 	
 	while(1){
 			
@@ -342,14 +342,14 @@ Below some examples of callback implementations.
 */
 void BSP_AUDIO_OUT_TransferComplete_CallBack()
 {
-		BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[ITOutAudio * (PCM_OUT_SIZE*2)], PCM_OUT_SIZE*3/2);//(*3/2,*3/2)  ,(*2,*3/2) normal ,(1,1)
+		BSP_AUDIO_OUT_Play((uint16_t*)&WrBuffer[ITOutAudio * (PCM_OUT_SIZE*2)], PCM_OUT_SIZE*8);//(*3/2,*3/2)  ,(*2,*3/2) normal ,(1,1)
 	  
 		if(nextITOutAudio == ITCounter){
 			ITOutAudio = ITOutAudio;
 		}
 		else {
 			ITOutAudio = nextITOutAudio;
-			nextITOutAudio++;			//+=2 +=3
+			nextITOutAudio+=2;			//+=2 +=3
 			nextITOutAudio%=(WR_BUFFER_SIZE/(PCM_OUT_SIZE*2));
 		}
 }
