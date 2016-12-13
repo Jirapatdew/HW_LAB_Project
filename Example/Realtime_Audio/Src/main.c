@@ -347,10 +347,11 @@ void BSP_AUDIO_OUT_TransferComplete_CallBack()
 		if(nextITOutAudio == ITCounter){
 			ITOutAudio = ITOutAudio;
 		}
-		else {
+		else 
+			{
 			ITOutAudio = nextITOutAudio;
 			nextITOutAudio+=2;			//+=2 +=3
-			nextITOutAudio%=(WR_BUFFER_SIZE/(PCM_OUT_SIZE*2)-2);
+			nextITOutAudio%=(WR_BUFFER_SIZE/(PCM_OUT_SIZE*2));
 		}
 }
 
