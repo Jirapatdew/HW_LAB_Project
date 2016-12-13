@@ -1,0 +1,27 @@
+--cpu Cortex-M4.fp
+"mp45dt02\startup_stm32f407xx.o"
+"mp45dt02\main.o"
+"mp45dt02\stm32f4xx_hal_msp.o"
+"mp45dt02\stm32f4xx_it.o"
+"mp45dt02\system_stm32f4xx.o"
+"mp45dt02\stm32f4xx_hal_flash.o"
+"mp45dt02\stm32f4xx_hal_flash_ramfunc.o"
+"mp45dt02\stm32f4xx_hal_gpio.o"
+"mp45dt02\stm32f4xx_hal_dma_ex.o"
+"mp45dt02\stm32f4xx_hal_tim_ex.o"
+"mp45dt02\stm32f4xx_hal_pwr_ex.o"
+"mp45dt02\stm32f4xx_hal.o"
+"mp45dt02\stm32f4xx_hal_i2s.o"
+"mp45dt02\stm32f4xx_hal_rcc.o"
+"mp45dt02\stm32f4xx_hal_rcc_ex.o"
+"mp45dt02\stm32f4xx_hal_dma.o"
+"mp45dt02\stm32f4xx_hal_uart.o"
+"mp45dt02\stm32f4xx_hal_flash_ex.o"
+"mp45dt02\stm32f4xx_hal_tim.o"
+"mp45dt02\stm32f4xx_hal_i2s_ex.o"
+"mp45dt02\stm32f4xx_hal_cortex.o"
+"mp45dt02\stm32f4xx_hal_pwr.o"
+--library_type=microlib --strict --scatter "MP45DT02\MP45DT02.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "MP45DT02.map" -o MP45DT02\MP45DT02.axf
