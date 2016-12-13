@@ -35,7 +35,8 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include <limits.h>
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -45,7 +46,9 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+#define PDM_BUFFER_SIZE 20
+#define LEAKY_KEEP_RATE 0.95
+#define PDM_BLOCK_SIZE_BITS 16
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,10 +60,18 @@ static void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+float float_abs(float);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+uint16_t pdm_buffer[PDM_BUFFER_SIZE]; // Buffer for pdm value from hi2s2 (Mic)
+uint16_t pdm_value=0;
+uint8_t  pcm_value=0;                 // For keeping pcm value calculated from pdm_value
+                                      // value range is 0-16, 8-bit is chosen because it
+                                      // can store 0-255
+
+float leaky_pcm_buffer = 0.0;         // Fast Estimation of moving average of PDM
+float leaky_amp_buffer = 0.0;         // Fast Estimation of moving average of abs(PCM)
 
 /* USER CODE END 0 */
 
@@ -68,7 +79,11 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	uint32_t i;
+	char out[100];
+  uint16_t size = 0;
+	float mx_amp = 0;
+  uint16_t mx_count = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -95,7 +110,31 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+		// Receive PDM from Mic
+		HAL_I2S_Receive(&hi2s2, pdm_buffer, PDM_BUFFER_SIZE, 1000); 
+		
+		for(i=0; i<PDM_BUFFER_SIZE; i++){
+			pcm_value = - (PDM_BLOCK_SIZE_BITS/2);
+      pdm_value = pdm_buffer[i];
+      // calculate PCM value
+      while ( pdm_value != 0 )                     // while pdm_value still have 1s in binary
+      {
+        pcm_value ++;
+        pdm_value ^= pdm_value & -pdm_value;       // remove left most 1 in binary
+      }
+      leaky_pcm_buffer += pcm_value;
+      leaky_pcm_buffer *= LEAKY_KEEP_RATE;
+      leaky_amp_buffer += float_abs(leaky_pcm_buffer);
+      leaky_amp_buffer *= LEAKY_KEEP_RATE;
+		}
+		mx_count++; // count sample
+		if(mx_amp < leaky_amp_buffer) mx_amp = leaky_amp_buffer;
+		if(mx_count == 2500){
+    	size = sprintf(out, "volume : %d\n\r", ((int)mx_amp)-(USHRT_MAX/2));
+    	HAL_UART_Transmit(&huart2, (uint8_t*)out, size, 100);
+    	mx_count = 0;
+    	mx_amp = 0;
+    }
   }
   /* USER CODE END 3 */
 
@@ -344,7 +383,9 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+float float_abs(float a){
+	return (a < 0) ? (-a) : (a);
+}
 /* USER CODE END 4 */
 
 /**
