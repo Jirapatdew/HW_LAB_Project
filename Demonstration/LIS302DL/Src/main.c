@@ -59,8 +59,8 @@ static void MX_USART2_UART_Init(void);
 /* Private function prototypes -----------------------------------------------*/
 void Init_Accel(void);
 void Get_Accel(void);
-void Print_Accel(int,int,int);
-void On_LED_Accel(int,int,int);
+void Print_Accel(int8_t,int8_t,int8_t);
+void On_LED_Accel(int8_t,int8_t,int8_t);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -359,8 +359,8 @@ void Init_Accel(){
   HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_SET);
 }
 void Get_Accel(){
-	uint8_t address,x,y,z;
-	
+	uint8_t address;
+	int8_t x,y,z;
 	//Receive
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_RESET);
 
@@ -382,26 +382,29 @@ void Get_Accel(){
 	On_LED_Accel(x,y,z);
 	Print_Accel(x,y,z);
 }
-void Print_Accel(int x,int y,int z){
+void Print_Accel(int8_t x,int8_t y,int8_t z){
 	//UART
 	char out[100];
 	int size;
-	size = sprintf(out,"Accelerometer  x = %d   :   y = %d   :   z = %d \n\r",x,y,z);
+	int16_t xout = (x * 9.8 * (4000.0/127) / 1000.0);
+	int16_t yout = (y * 9.8 * (4000.0/127) / 1000.0);
+	int16_t zout = (z * 9.8 * (4000.0/127) / 1000.0);
+	size = sprintf(out,"Accelerometer  x = %d   :   y = %d   :   z = %d \n\r",xout,yout,zout);
   HAL_UART_Transmit(&huart2,(uint8_t*)out,size,1000);
   HAL_Delay(200);
 }
-void On_LED_Accel(int x,int y,int z){
+void On_LED_Accel(int8_t x,int8_t y,int8_t z){
 	//up
-	if((y>15&&y<60)&&(x<15||x>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
+	if (y >= 15) HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
 	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
 	//left
-	if((x<235&&x>200)&&(y<15||y>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_SET);
+	if (x <= -15) HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_SET);
 	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_RESET);
 	//right
-	if((x>20&&x<60)&&(y<15||y>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_14,GPIO_PIN_SET);
+	if (x >= 15)HAL_GPIO_WritePin(GPIOD,GPIO_PIN_14,GPIO_PIN_SET);
 	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_14,GPIO_PIN_RESET);
 	//down
-	if((y<240&&y>200)&&(x<15||x>240))HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,GPIO_PIN_SET);
+	if (y <= -15) HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,GPIO_PIN_SET);
 	else HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,GPIO_PIN_RESET);
 }
 /* USER CODE END 4 */
