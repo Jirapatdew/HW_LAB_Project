@@ -529,7 +529,7 @@ I (..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_pwr_ex.h)(0x5730716E)
 I (..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_spi.h)(0x57307170)
 I (..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h)(0x57307170)
 F (..\readme.txt)(0x572C1128)()
-F (..\Src\main.c)(0x584F9459)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\Inc -I ..\Drivers\CMSIS\Device\ST\STM32F4xx\Include -I ..\Drivers\BSP\STM32F4-Discovery -I ..\Drivers\STM32F4xx_HAL_Driver\Inc --C99-IE:\GitHub\HW_LAB_Project\Example\Realtime_Audio\MDK-ARM\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.10.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx -DUSE_STM32F4_DISCO --C99-o stm32f4-discovery\main.o --omf_browse stm32f4-discovery\main.crf --depend stm32f4-discovery\main.d)
+F (..\Src\main.c)(0x584F9DD4)(-c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\Inc -I ..\Drivers\CMSIS\Device\ST\STM32F4xx\Include -I ..\Drivers\BSP\STM32F4-Discovery -I ..\Drivers\STM32F4xx_HAL_Driver\Inc --C99-IE:\GitHub\HW_LAB_Project\Example\Realtime_Audio\MDK-ARM\RTE-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.10.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="521" -D_RTE_ -DSTM32F407xx -DUSE_HAL_DRIVER -DSTM32F407xx -DUSE_STM32F4_DISCO --C99-o stm32f4-discovery\main.o --omf_browse stm32f4-discovery\main.crf --depend stm32f4-discovery\main.d)
 I (..\Inc\main.h)(0x584F921B)
 I (..\Drivers\BSP\STM32F4-Discovery\stm32f4_discovery.h)(0x572C13F8)
 I (..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h)(0x5730716E)
