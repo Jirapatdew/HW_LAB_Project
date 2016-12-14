@@ -61,6 +61,7 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 float float_abs(float);
+int abs(int);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -100,7 +101,7 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -129,8 +130,8 @@ int main(void)
 		}
 		mx_count++; // count sample
 		if(mx_amp < leaky_amp_buffer) mx_amp = leaky_amp_buffer;
-		if(mx_count == 2500){
-    	size = sprintf(out, "volume : %d\n\r", ((int)mx_amp)-(USHRT_MAX/2));
+		if(mx_count == 1000){
+    	size = sprintf(out, "volume : %d\n\r", abs(((int)mx_amp)-56000));
     	HAL_UART_Transmit(&huart2, (uint8_t*)out, size, 100);
     	mx_count = 0;
     	mx_amp = 0;
@@ -384,6 +385,9 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 float float_abs(float a){
+	return (a < 0) ? (-a) : (a);
+}
+int abs(int a){
 	return (a < 0) ? (-a) : (a);
 }
 /* USER CODE END 4 */
