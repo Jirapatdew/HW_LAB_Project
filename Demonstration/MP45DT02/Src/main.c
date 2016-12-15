@@ -68,8 +68,6 @@ int abs(int);
 uint16_t pdm_buffer[PDM_BUFFER_SIZE]; // Buffer for pdm value from hi2s2 (Mic)
 uint16_t pdm_value=0;
 uint8_t  pcm_value=0;                 // For keeping pcm value calculated from pdm_value
-                                      // value range is 0-16, 8-bit is chosen because it
-                                      // can store 0-255
 
 float leaky_pcm_buffer = 0.0;         // Fast Estimation of moving average of PDM
 float leaky_amp_buffer = 0.0;         // Fast Estimation of moving average of abs(PCM)
