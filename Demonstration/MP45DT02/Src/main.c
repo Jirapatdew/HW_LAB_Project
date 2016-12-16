@@ -48,7 +48,7 @@ UART_HandleTypeDef huart2;
 /* Private variables ---------------------------------------------------------*/
 #define PDM_BUFFER_SIZE 20
 #define LEAKY_KEEP_RATE 0.95
-#define PDM_BLOCK_SIZE_BITS 16
+#define PDM_BLOCK_SIZE_BITS 8
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,7 +67,7 @@ int abs(int);
 /* USER CODE BEGIN 0 */
 uint16_t pdm_buffer[PDM_BUFFER_SIZE]; // Buffer for pdm value from hi2s2 (Mic)
 uint16_t pdm_value=0;
-uint8_t  pcm_value=0;                 // For keeping pcm value calculated from pdm_value
+int8_t  pcm_value=0;                 // For keeping pcm value calculated from pdm_value
 
 float leaky_pcm_buffer = 0.0;         // Fast Estimation of moving average of PDM
 float leaky_amp_buffer = 0.0;         // Fast Estimation of moving average of abs(PCM)
@@ -129,7 +129,7 @@ int main(void)
 		mx_count++; // count sample
 		if(mx_amp < leaky_amp_buffer) mx_amp = leaky_amp_buffer;
 		if(mx_count == 1000){
-    	size = sprintf(out, "volume : %d\n\r", abs(((int)mx_amp)-56000));
+    	size = sprintf(out, "volume : %d\n\r", (int)mx_amp);
     	HAL_UART_Transmit(&huart2, (uint8_t*)out, size, 100);
     	mx_count = 0;
     	mx_amp = 0;
